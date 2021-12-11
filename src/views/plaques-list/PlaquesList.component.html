@@ -1,0 +1,303 @@
+<div class="plaques-list">
+  <v-toolbar flat color="white">
+    <v-toolbar-title>Plaques</v-toolbar-title>
+    <v-spacer></v-spacer>
+    <v-dialog v-model="uploadFileDialog" max-width="500px">
+      <template v-slot:activator="{ on }">
+        <v-btn color="primary" dark class="mb-2" v-on="on">Upload file</v-btn>
+      </template>
+      <file-upload-component
+        @fileUploadSaved="onFileUploadSaved"
+        @fileUploadClosed="onFileUploadClosed"
+        :total="totalUploadedPlaques"
+        :count="countUploadedPlaques"
+        :shown="uploadFileDialog"
+      >
+        <v-select
+          slot="additionalFields"
+          v-model="selectedProjectId"
+          :items="projects"
+          label="Select project"
+          item-text="name"
+          item-value="id"
+        >
+        </v-select>
+      </file-upload-component>
+    </v-dialog>
+    <v-dialog v-model="newDialog" max-width="500px">
+      <template v-slot:activator="{ on }">
+        <v-btn color="primary" dark class="mb-2" v-on="on">New Plaque</v-btn>
+      </template>
+      <v-card>
+        <v-card-title>
+          <span class="headline">New Plaque</span>
+        </v-card-title>
+
+        <v-card-text class="pt-1">
+          <v-container grid-list-md class="pt-1">
+            <v-layout wrap>
+              <v-flex xs12 sm4 md4>
+                <v-text-field
+                  v-model="editedItem.identifier"
+                  label="Identifier"
+                  type="number"
+                >
+                </v-text-field>
+              </v-flex>
+              <v-flex xs12 sm12 md12>
+                <v-select
+                  v-model="editedItem.projectId"
+                  :items="projects"
+                  label="Project"
+                  item-text="name"
+                  item-value="id"
+                >
+                </v-select>
+              </v-flex>
+              <v-flex xs12 sm6 md6>
+                <v-text-field
+                  v-model="editedItem.donorFirstName"
+                  label="Donor first name"
+                >
+                </v-text-field>
+              </v-flex>
+              <v-flex xs12 sm6 md6>
+                <v-text-field
+                  v-model="editedItem.donorLastName"
+                  label="Donor last name"
+                ></v-text-field>
+              </v-flex>
+              <v-flex xs12 sm6 md6>
+                <v-text-field
+                  v-model="editedItem.honoreeFirstName"
+                  label="Honoree first name"
+                >
+                </v-text-field>
+              </v-flex>
+              <v-flex xs12 sm6 md6>
+                <v-text-field
+                  v-model="editedItem.honoreeLastName"
+                  label="Honoree last name"
+                >
+                </v-text-field>
+              </v-flex>
+              <v-flex xs12 sm12 md12>
+                <v-text-field
+                  v-model="editedItem.plaqueText"
+                  label="Plaque text"
+                >
+                </v-text-field>
+              </v-flex>
+            </v-layout>
+          </v-container>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1" flat @click="close">Cancel</v-btn>
+          <v-btn color="blue darken-1" flat @click="save">Save</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <v-dialog
+      v-model="editDialog"
+      fullscreen
+      hide-overlay
+      transition="dialog-bottom-transition"
+    >
+      <v-card>
+        <v-toolbar dark color="primary">
+          <v-btn icon dark @click="editDialog = false">
+            <v-icon>close</v-icon>
+          </v-btn>
+          <v-toolbar-title class="headline">Edit plaque</v-toolbar-title>
+        </v-toolbar>
+
+        <v-card-text>
+          <v-container grid-list-md>
+            <v-layout wrap>
+              <tinymce-editor
+                api-key="71vbu2zc0hzgyitiwe25ie3sl89qqjf58va12r7dbda1kgul"
+                v-model="editedItem.plaqueHtmlText"
+                :init="{width: 1200, height: 600}"
+              ></tinymce-editor>
+            </v-layout>
+          </v-container>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1" flat @click="save">Save</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+  </v-toolbar>
+  <v-card>
+    <v-card-title class="search-container">
+      <v-flex xs12 sm4 md4>
+        <v-select
+          v-model="selectedProjectId"
+          :items="projects"
+          label="Select project"
+          item-text="name"
+          item-value="id"
+        >
+        </v-select>
+      </v-flex>
+      <v-spacer sm1 md1></v-spacer>
+      <v-flex xs12 sm7 md7>
+        <v-text-field
+          v-model="search"
+          append-icon="search"
+          label="Search"
+          single-line
+          hide-details
+        >
+        </v-text-field>
+      </v-flex>
+    </v-card-title>
+    <v-data-table
+      :headers="headers"
+      :items="plaques"
+      :search="search"
+      :loading="loading && !uploadFileDialog"
+      :rows-per-page-items="[10,25,50,{text:'$vuetify.dataIterator.rowsPerPageAll',value:-1}]"
+      class="elevation-1"
+    >
+      <template v-slot:items="props">
+        <td>
+          <v-edit-dialog
+            :return-value.sync="props.item.identifier"
+            lazy
+            @save="save(props.item)"
+            @cancel="cancel"
+          >
+            {{ props.item.identifier }}
+            <template v-slot:input>
+              <v-text-field
+                v-model="props.item.identifier"
+                label="Identifier"
+                single-line
+                counter
+              >
+              </v-text-field>
+            </template>
+          </v-edit-dialog>
+        </td>
+        <td>
+          <v-edit-dialog
+            :return-value.sync="props.item.donorFirstName"
+            lazy
+            @save="save(props.item)"
+            @cancel="cancel"
+          >
+            {{ props.item.donorFirstName }}
+            <template v-slot:input>
+              <v-text-field
+                v-model="props.item.donorFirstName"
+                label="Donor first name"
+                single-line
+                counter
+              >
+              </v-text-field>
+            </template>
+          </v-edit-dialog>
+        </td>
+        <td>
+          <v-edit-dialog
+            :return-value.sync="props.item.donorLastName"
+            lazy
+            @save="save(props.item)"
+            @cancel="cancel"
+          >
+            {{ props.item.donorLastName }}
+            <template v-slot:input>
+              <v-text-field
+                v-model="props.item.donorLastName"
+                label="Donor last name"
+                single-line
+                counter
+              >
+              </v-text-field>
+            </template>
+          </v-edit-dialog>
+        </td>
+        <td>
+          <v-edit-dialog
+            :return-value.sync="props.item.honoreeFirstName"
+            lazy
+            @save="save(props.item)"
+            @cancel="cancel"
+          >
+            {{ props.item.honoreeFirstName }}
+            <template v-slot:input>
+              <v-text-field
+                v-model="props.item.honoreeFirstName"
+                label="Honoree first name"
+                single-line
+                counter
+              >
+              </v-text-field>
+            </template>
+          </v-edit-dialog>
+        </td>
+        <td>
+          <v-edit-dialog
+            :return-value.sync="props.item.honoreeLastName"
+            lazy
+            @save="save(props.item)"
+            @cancel="cancel"
+          >
+            {{ props.item.honoreeLastName }}
+            <template v-slot:input>
+              <v-text-field
+                v-model="props.item.honoreeLastName"
+                label="Honoree last name"
+                single-line
+                counter
+              >
+              </v-text-field>
+            </template>
+          </v-edit-dialog>
+        </td>
+        <td>
+          <v-edit-dialog
+            :return-value.sync="props.item.plaqueText"
+            lazy
+            @save="save(props.item)"
+            @cancel="cancel"
+          >
+            {{ props.item.plaqueText }}
+            <template v-slot:input>
+              <v-text-field
+                v-model="props.item.plaqueText"
+                label="Plaque text"
+                single-line
+                counter
+              >
+              </v-text-field>
+            </template>
+          </v-edit-dialog>
+        </td>
+        <td class="justify-center layout px-0">
+          <v-icon small class="mr-2" @click="editItem(props.item)">
+            edit
+          </v-icon>
+          <v-icon small @click="deleteItem(props.item)">
+            delete
+          </v-icon>
+        </td>
+      </template>
+      <template v-slot:no-results>
+        <v-alert :value="true" color="error" icon="warning">
+          Your search for "{{ search }}" found no results.
+        </v-alert>
+      </template>
+    </v-data-table>
+  </v-card>
+
+  <v-snackbar v-model="snack" :timeout="3000" :color="snackColor">
+    {{ snackText }}
+    <v-btn flat @click="snack = false">Close</v-btn>
+  </v-snackbar>
+</div>

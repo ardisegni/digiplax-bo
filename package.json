@@ -1,0 +1,54 @@
+{
+  "name": "digiplax-bo",
+  "version": "0.1.0",
+  "author": "Ariel Di Segni",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint"
+  },
+  "dependencies": {
+    "@tinymce/tinymce-vue": "^2.0.0",
+    "axios": "^0.18.0",
+    "bootstrap": "^4.3.1",
+    "jquery": "^3.4.1",
+    "node-sass": "^4.11.0",
+    "popper.js": "^1.15.0",
+    "rxjs": "^6.5.2",
+    "sass-loader": "^7.1.0",
+    "vue": "^2.6.6",
+    "vue-axios": "^2.1.4",
+    "vue-class-component": "^7.0.1",
+    "vue-property-decorator": "^8.0.0",
+    "vue-router": "^3.0.1",
+    "vue-rx": "^6.2.0",
+    "vuetify": "^1.5.5",
+    "vuetify-upload-button": "^2.0.0",
+    "vuex": "^3.0.1",
+    "vuex-class": "^0.3.2",
+    "vuex-persist": "^2.1.0"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "^3.5.0",
+    "@vue/cli-plugin-typescript": "^3.5.0",
+    "@vue/cli-service": "^3.5.0",
+    "stylus": "^0.54.5",
+    "stylus-loader": "^3.0.1",
+    "tslint-config-prettier": "^1.18.0",
+    "typescript": "^3.2.1",
+    "vue-cli-plugin-vuetify": "^0.5.0",
+    "vue-template-compiler": "^2.5.21",
+    "vuetify-loader": "^1.0.5"
+  },
+  "postcss": {
+    "plugins": {
+      "autoprefixer": {}
+    }
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not ie <= 8"
+  ]
+}

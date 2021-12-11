@@ -1,0 +1,89 @@
+<div class="projects-list">
+  <v-toolbar flat color="white">
+    <v-toolbar-title>Projects</v-toolbar-title>
+    <v-spacer></v-spacer>
+    <v-dialog v-model="editDialog" max-width="500px">
+      <template v-slot:activator="{ on }">
+        <v-btn color="primary" dark class="mb-2" v-on="on">New Project</v-btn>
+      </template>
+      <v-card>
+        <v-card-title>
+          <span class="headline">New Project</span>
+        </v-card-title>
+
+        <div class="text-danger ml-5">
+          <span v-if="serverError" v-html="serverError"></span>
+        </div>
+
+        <v-card-text>
+          <v-container grid-list-md>
+            <v-layout wrap>
+              <v-flex xs12 sm12 md12>
+                <v-text-field v-model="editedItem.name" label="Name">
+                </v-text-field>
+              </v-flex>
+              <v-flex xs12 sm12 md12>
+                <v-select
+                  v-model="editedItem.timezone"
+                  :items="timezones"
+                  label="Timezone"
+                ></v-select>
+              </v-flex>
+              <v-flex xs12 sm12 md12>
+                <v-text-field
+                  v-model="editedItem.urlParam"
+                  label="URL parameter"
+                ></v-text-field>
+              </v-flex>
+            </v-layout>
+          </v-container>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1" flat @click="close">Cancel</v-btn>
+          <v-btn color="blue darken-1" flat @click="save">Save</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+  </v-toolbar>
+  <v-card>
+    <v-card-title style="width: 52%; float: right;">
+      <v-text-field
+        v-model="search"
+        append-icon="search"
+        label="Search"
+        single-line
+        hide-details
+      >
+      </v-text-field>
+    </v-card-title>
+    <v-data-table
+      :headers="headers"
+      :items="projects"
+      :search="search"
+      :loading="loading"
+      :rows-per-page-items="[10,25,50,{text:'$vuetify.dataIterator.rowsPerPageAll',value:-1}]"
+      class="elevation-1"
+    >
+      <template v-slot:items="props">
+        <td>{{ props.item.name }}</td>
+        <td>{{ props.item.timezone }}</td>
+        <td>{{ props.item.urlParam }}</td>
+        <td class="justify-center layout px-0">
+          <v-icon small class="mr-2" @click="editItem(props.item)">
+            edit
+          </v-icon>
+          <v-icon small @click="deleteItem(props.item)">
+            delete
+          </v-icon>
+        </td>
+      </template>
+      <template v-slot:no-results>
+        <v-alert :value="true" color="error" icon="warning">
+          Your search for "{{ search }}" found no results.
+        </v-alert>
+      </template>
+    </v-data-table>
+  </v-card>
+</div>

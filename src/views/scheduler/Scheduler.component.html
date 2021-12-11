@@ -1,0 +1,252 @@
+<div class="scheduler">
+  <v-spacer></v-spacer>
+  <v-dialog v-model="editDialog" max-width="1000px">
+    <template v-slot:activator="{ on }">
+      <v-btn color="primary" dark class="mb-2" v-on="on">
+        Schedule new plaque
+      </v-btn>
+    </template>
+    <v-card>
+      <v-card-title>
+        <span class="headline">Schedule plaque</span>
+      </v-card-title>
+
+      <div class="text-danger ml-5">
+        <span v-if="serverError" v-html="serverError"></span>
+      </div>
+
+      <v-card-text>
+        <v-container grid-list-md>
+          <v-layout wrap>
+            <v-flex xs12 sm1 md1>
+              <label class="date-label">From:</label>
+            </v-flex>
+            <v-flex xs12 sm5 md5>
+              <v-menu
+                ref="dateFromMenu"
+                v-model="dateFromMenu"
+                :close-on-content-click="false"
+                :return-value.sync="editedItem.dateFrom"
+                transition="scale-transition"
+                offset-y
+                full-width
+                min-width="290px"
+              >
+                <template v-slot:activator="{ on }">
+                  <v-text-field
+                    v-model="editedItem.dateFrom"
+                    label="Date"
+                    prepend-icon="event"
+                    readonly
+                    v-on="on"
+                  ></v-text-field>
+                </template>
+                <v-date-picker
+                  v-model="editedItem.dateFrom"
+                  no-title
+                  scrollable
+                  :min="$options.filters.formatDate(new Date())"
+                >
+                  <div class="flex-grow-1"></div>
+                  <v-btn text color="primary" @click="dateFromMenu = false">
+                    Cancel
+                  </v-btn>
+                  <v-btn
+                    text
+                    color="primary"
+                    @click="$refs.dateFromMenu.save(editedItem.dateFrom)"
+                  >
+                    OK
+                  </v-btn>
+                </v-date-picker>
+              </v-menu>
+            </v-flex>
+            <v-flex xs12 sm6 md6>
+              <v-menu
+                ref="timeFromMenu"
+                v-model="timeFromMenu"
+                :close-on-content-click="false"
+                :nudge-right="40"
+                :return-value.sync="editedItem.timeFrom"
+                transition="scale-transition"
+                offset-y
+                full-width
+                max-width="290px"
+                min-width="290px"
+              >
+                <template v-slot:activator="{ on }">
+                  <v-text-field
+                    v-model="editedItem.timeFrom"
+                    label="Time"
+                    prepend-icon="access_time"
+                    readonly
+                    v-on="on"
+                  ></v-text-field>
+                </template>
+                <v-time-picker
+                  v-if="timeFromMenu"
+                  v-model="editedItem.timeFrom"
+                  full-width
+                  format="24hr"
+                  @click:minute="$refs.timeFromMenu.save(editedItem.timeFrom)"
+                ></v-time-picker>
+              </v-menu>
+            </v-flex>
+            <v-flex xs12 sm1 md1>
+              <label class="date-label">To:</label>
+            </v-flex>
+            <v-flex xs12 sm5 md5>
+              <v-menu
+                ref="dateToMenu"
+                v-model="dateToMenu"
+                :close-on-content-click="false"
+                :return-value.sync="editedItem.dateTo"
+                transition="scale-transition"
+                offset-y
+                full-width
+                min-width="290px"
+              >
+                <template v-slot:activator="{ on }">
+                  <v-text-field
+                    v-model="editedItem.dateTo"
+                    label="Date"
+                    prepend-icon="event"
+                    readonly
+                    v-on="on"
+                  ></v-text-field>
+                </template>
+                <v-date-picker
+                  v-model="editedItem.dateTo"
+                  no-title
+                  scrollable
+                  :min="$options.filters.formatDate(new Date())"
+                >
+                  <div class="flex-grow-1"></div>
+                  <v-btn text color="primary" @click="dateToMenu = false">
+                    Cancel
+                  </v-btn>
+                  <v-btn
+                    text
+                    color="primary"
+                    @click="$refs.dateToMenu.save(editedItem.dateTo)"
+                  >
+                    OK
+                  </v-btn>
+                </v-date-picker>
+              </v-menu>
+            </v-flex>
+            <v-flex xs12 sm6 md6>
+              <v-menu
+                ref="timeToMenu"
+                v-model="timeToMenu"
+                :close-on-content-click="false"
+                :nudge-right="40"
+                :return-value.sync="editedItem.timeTo"
+                transition="scale-transition"
+                offset-y
+                full-width
+                max-width="290px"
+                min-width="290px"
+              >
+                <template v-slot:activator="{ on }">
+                  <v-text-field
+                    v-model="editedItem.timeTo"
+                    label="Time"
+                    prepend-icon="access_time"
+                    readonly
+                    v-on="on"
+                  ></v-text-field>
+                </template>
+                <v-time-picker
+                  v-if="timeToMenu"
+                  v-model="editedItem.timeTo"
+                  full-width
+                  format="24hr"
+                  @click:minute="$refs.timeToMenu.save(editedItem.timeTo)"
+                ></v-time-picker>
+              </v-menu>
+            </v-flex>
+            <v-flex xs12 sm1 md1>
+              <label class="date-label">Project:</label>
+            </v-flex>
+            <v-flex xs12 sm11 md11>
+              <v-select
+                v-model="selectedProjectId"
+                :items="projects"
+                item-text="name"
+                item-value="id"
+              >
+              </v-select>
+            </v-flex>
+            <v-flex xs12 sm1 md1>
+              <label class="date-label">Plaque:</label>
+            </v-flex>
+            <v-flex xs12 sm11 md11>
+              <v-autocomplete
+                v-model="editedItem.plaque"
+                :loading="loading"
+                :items="plaques"
+                item-text="plaqueText"
+                return-object
+                :search-input.sync="searchPlaque"
+                flat
+                hide-no-data
+                hide-details
+                label="Search plaque by text"
+              ></v-autocomplete>
+            </v-flex>
+          </v-layout>
+        </v-container>
+      </v-card-text>
+
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="blue darken-1" flat @click="close">Cancel</v-btn>
+        <v-btn color="blue darken-1" flat @click="save">
+          <v-progress-circular
+            v-if="saving"
+            indeterminate
+          ></v-progress-circular>
+          <span v-else>Save</span>
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+  <v-tabs v-model="activeTab">
+    <v-tab v-for="tab of tabs" :key="tab.key" @click="onTabChange(tab.key)">
+      {{ tab.title }}
+    </v-tab>
+  </v-tabs>
+  <v-tabs-items v-model="activeTab">
+    <v-tab-item v-for="tab of tabs" :key="tab.key">
+      <v-data-table
+        :headers="headers"
+        :items="tab.key === 'active' ? activeScheduledPlaques : pastScheduledPlaques"
+        :search="search"
+        :loading="loading"
+        :rows-per-page-items="[10,25,50,{text:'$vuetify.dataIterator.rowsPerPageAll',value:-1}]"
+        class="elevation-1"
+      >
+        <template v-slot:items="props">
+          <td>{{ props.item.plaque.projectName }}</td>
+          <td>{{ props.item.dateFrom | formatDateTime }}</td>
+          <td>{{ props.item.dateTo | formatDateTime }}</td>
+          <td>{{ props.item.plaque.plaqueText }}</td>
+          <td class="justify-center layout px-0">
+            <v-icon small class="mr-2" @click="editItem(props.item)">
+              edit
+            </v-icon>
+            <v-icon small @click="deleteItem(props.item)">
+              delete
+            </v-icon>
+          </td>
+        </template>
+        <template v-slot:no-results>
+          <v-alert :value="true" color="error" icon="warning">
+            Your search for "{{ search }}" found no results.
+          </v-alert>
+        </template>
+      </v-data-table>
+    </v-tab-item>
+  </v-tabs-items>
+</div>

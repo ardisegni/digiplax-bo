@@ -1,0 +1,35 @@
+<v-card>
+  <v-card-title>
+    <span class="headline">Upload Excel file</span>
+  </v-card-title>
+
+  <v-card-text>
+    <v-container grid-list-md class="pt-1">
+      <v-layout wrap>
+        <v-flex xs12>
+          <slot name="additionalFields"></slot>
+        </v-flex>
+        <v-flex xs12>
+          <upload-btn
+            title="Choose file"
+            ref="uploadButton"
+            @file-update="onFileUpdate"
+          >
+            <template slot="icon-left">
+              <v-icon left color="white">cloud_upload</v-icon>
+            </template>
+          </upload-btn>
+        </v-flex>
+        <v-flex xs12 v-if="uploadProgress">
+          <v-progress-linear v-model="uploadProgress"></v-progress-linear>
+        </v-flex>
+      </v-layout>
+    </v-container>
+  </v-card-text>
+
+  <v-card-actions>
+    <v-spacer></v-spacer>
+    <v-btn color="blue darken-1" flat @click="close">Cancel</v-btn>
+    <v-btn color="blue darken-1" flat @click="save">Save</v-btn>
+  </v-card-actions>
+</v-card>

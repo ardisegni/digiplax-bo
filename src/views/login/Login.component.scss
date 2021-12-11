@@ -1,0 +1,12 @@
+.login {
+  .login-content {
+    height: calc(100vh);
+
+    .btn-container {
+      display: flex;
+      .submit-btn {
+        margin: 15px auto;
+      }
+    }
+  }
+}
