@@ -19,7 +19,6 @@ const authGuard: NavigationGuard = (_to, _from, next) => {
 };
 
 export default new Router({
-  base: '/admin/',
   mode: 'history',
   routes: [
     {
